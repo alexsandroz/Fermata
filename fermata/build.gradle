@@ -39,7 +39,7 @@ android {
             resValue "string", "mirror_fs_service_name", "@string/mirror_fs_service_name_release"
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     '../proguard-rules.pro', '../depends/utils/proguard-rules.pro'
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
             buildConfigField "boolean", 'D', 'false'
         }
 
@@ -52,7 +52,7 @@ android {
             resValue "string", "media_service_name_mobile", "@string/media_service_name_mobile_debug"
             resValue "string", "mirror_service_name", "@string/mirror_service_name_debug"
             resValue "string", "mirror_fs_service_name", "@string/mirror_fs_service_name_debug"
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
             buildConfigField "boolean", 'D', 'true'
         }
     }

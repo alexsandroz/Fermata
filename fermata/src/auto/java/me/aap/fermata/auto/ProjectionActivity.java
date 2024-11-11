@@ -6,7 +6,9 @@ import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
 import static me.aap.utils.async.Completed.completedVoid;
 import static me.aap.utils.function.ResultConsumer.Cancel.isCancellation;
 
+import android.app.NotificationManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.media.projection.MediaProjectionManager;
@@ -66,7 +68,9 @@ public class ProjectionActivity extends ActivityBase {
 		checkOverlayPermission().thenIgnoreResult(this::checkWriteSettingsPermission)
 				.thenIgnoreResult(this::checkAccessibilityPermission)
 				.thenIgnoreResult(this::requestRootPermission)
-				.thenIgnoreResult(this::requestScreenCapturePermission).onCompletion((i, err) -> {
+				.thenIgnoreResult(this::checkFullScreenIntentPermission)
+				.thenIgnoreResult(this::requestScreenCapturePermission)
+				.onCompletion((i, err) -> {
 					AccessibilityEventDispatcherService.autoClickOnButton(null);
 					if (promise != p) return;
 					starting = false;
@@ -81,6 +85,16 @@ public class ProjectionActivity extends ActivityBase {
 					}
 				});
 	}
+
+	private FutureSupplier<?> checkFullScreenIntentPermission() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return completedVoid();
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		if (notificationManager.canUseFullScreenIntent()) return completedVoid();
+		Log.i("Requesting ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT permission");
+		return startActivityForResult(() -> new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+				Uri.parse("package:" + getPackageName())));
+	}
+
 
 	private FutureSupplier<?> checkOverlayPermission() {
 		if (Settings.canDrawOverlays(this)) return completedVoid();
